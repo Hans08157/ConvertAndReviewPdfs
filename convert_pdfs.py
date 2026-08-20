@@ -1,4 +1,4 @@
-"""Konvertiert alle PDFs in diesem Ordner mit docling nach Markdown + JSON.
+"""Konvertiert alle PDFs aus dem Ordner ./input mit docling nach Markdown + JSON.
 
 Pro PDF wird ein Unterordner in ./output angelegt:
     output/<name>/<name>.md            Markdown mit referenzierten Bildern (relative Pfade)
@@ -28,6 +28,7 @@ from docling_core.types.doc import ImageRefMode, PictureItem, TableItem
 from review_render import normalize_slashes, render_review_html
 
 BASE_DIR = Path(__file__).parent
+INPUT_DIR = BASE_DIR / "input"
 OUTPUT_DIR = BASE_DIR / "output"
 
 
@@ -88,7 +89,12 @@ def convert_one(converter: DocumentConverter, pdf_path: Path) -> None:
 def main() -> None:
     limit = int(sys.argv[1]) if len(sys.argv) > 1 else None
 
-    pdfs = sorted(BASE_DIR.glob("*.pdf"))
+    if not INPUT_DIR.is_dir():
+        print(f"Eingabeordner nicht gefunden: {INPUT_DIR}")
+        print("Bitte Ordner 'input' anlegen und die PDF-Dateien hineinlegen.")
+        return
+
+    pdfs = sorted(INPUT_DIR.glob("*.pdf"))
     # Bereits fertig konvertierte überspringen
     todo = [p for p in pdfs if not (OUTPUT_DIR / p.stem / ".done").exists()]
     skipped = len(pdfs) - len(todo)
